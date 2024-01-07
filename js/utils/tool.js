@@ -1,3 +1,4 @@
+const assert = require('assert');
 
 class CryptoTool{
     constructor(curve, PBASE) {
@@ -16,6 +17,9 @@ class CryptoTool{
 
     // a pesudorandom function, see paper for details
     PRF_k(pk, rho){
+        if(typeof pk !== "bigint"){
+            pk = this.point2BigInt(pk[0]);
+        }
         return this.addPoint(
             this.mulPointEscalar(this.PBASE[0], pk),
             this.mulPointEscalar(this.PBASE[1], rho)
@@ -40,6 +44,9 @@ class CryptoTool{
 
     // calculate signle cm
     cmCalculator(pk, rho, v){
+        if(typeof pk !== "bigint"){
+            pk = this.point2BigInt(pk[0]);
+        }
         return this.addPoint(
             this.mulPointEscalar(this.PBASE[0], this.point2BigInt(this.PRF_k(pk, rho)[0])),
             this.mulPointEscalar(this.PBASE[1], v)
@@ -60,21 +67,17 @@ class CryptoTool{
 
         if(typeof pkList[0] === "bigint"){
             for(let i=0;i<rhoList.length;i++){
-                cmList[i] = this.point2BigInt(
-                    this.cmCalculator(
+                cmList[i] = this.cmCalculator(
                         pkList[i],
                         rhoList[i],
-                        vList[i])[0]
-                );
+                        vList[i]);
             }
         }else{
             for(let i=0;i<rhoList.length;i++){
-                cmList[i] = this.point2BigInt(
-                    this.cmCalculator(
+                cmList[i] = this.cmCalculator(
                         this.point2BigInt(pkList[i][0]),
                         rhoList[i],
-                        vList[i])[0]
-                );
+                        vList[i]);
             }
         }
 
@@ -179,7 +182,6 @@ class CryptoTool{
         }
     }
 
-
     // js valid of sigma proof of value
     sigmaProofOfValueVerifier(A, B, zList_1, zList_2, upk, XList, YList, hash){
         // check length
@@ -210,6 +212,92 @@ class CryptoTool{
             );
             if(!this.deepEqual(upkz_1, AXe) ||
                 !this.deepEqual(gz_1hz_2, BYe)){
+                assert.fail();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // sigma proof of sks
+    sigmaProofOfSkGenerator(upk, rListNew, vListNew, hash, randomList) {
+        // check length
+        if (rListNew.length !== vListNew.length) {
+            throw new Error("rListNew, vListNew should have the same length");
+        }
+        // check length > 0
+        if (rListNew.length === 0) {
+            throw new Error("rListNew, vListNew should have length > 0");
+        }
+        let A = [];
+        let B = [];
+        for (let i = 0; i < randomList.length; i++) {
+            A.push(this.mulPointEscalar(this.PBASE[0], randomList[i][0]));
+            B.push(this.addPoint(
+                    this.mulPointEscalar(upk, randomList[i][0]),
+                    this.mulPointEscalar(this.PBASE[0], randomList[i][1])
+                )
+            );
+        }
+
+        let hashInput = (this.sumPointArray(A)
+            + this.sumPointArray(B)).toString();
+        let e = hash(hashInput);
+        let e_BigInt = BigInt("0x"+e);
+        let zList_1 = [];
+        let zList_2 = [];
+        for (let i = 0; i < randomList.length; i++) {
+            // let js = (randomList[0] + e_BigInt * rListNew[i])%this.field.p;
+            // let test2 = this.point2BigInt(this.field.e(BigInt(randomList[0] + e_BigInt * rListNew[i])));
+            zList_1[i]=(randomList[i][0] + e_BigInt * rListNew[i])%this.curve.order;
+            zList_2[i]=(randomList[i][1] + e_BigInt * BigInt(vListNew[i]))%this.curve.order;
+        }
+
+        return {
+            A: A,
+            B: B,
+            zList_1: zList_1,
+            zList_2: zList_2,
+            sol_input:{
+                A: this.array2FField16(A),
+                B: this.array2FField16(B),
+                zList_1: this.array216(zList_1),
+                zList_2: this.array216(zList_2)
+            }
+        }
+    }
+
+    // js valid of sigma proof of value
+    sigmaProofOfSkVerifier(A, B, zList_1, zList_2, upk, XList, YList, hash){
+        // check length
+        if (A.length !== B.length || B.length !== zList_1.length || zList_1.length !== zList_2.length) {
+            throw new Error("A, B, zList_1, zList_2 should have the same length");
+        }
+        // check length > 0
+        if (A.length === 0) {
+            throw new Error("A, B, zList_1, zList_2 should have length > 0");
+        }
+        let hashInput = (this.sumPointArray(A)
+            + this.sumPointArray(B)).toString();
+        let e = hash(hashInput);
+        let e_BigInt = BigInt("0x"+e);
+        for(let i=0;i<A.length;i++){
+            let upkz_1 = this.mulPointEscalar(this.PBASE[0], zList_1[i]);
+            let AXe = this.addPoint(
+                A[i],
+                this.mulPointEscalar(XList[i], e_BigInt)
+            );
+            let gz_1hz_2 = this.addPoint(
+                this.mulPointEscalar(upk, zList_1[i]),
+                this.mulPointEscalar(this.PBASE[0], zList_2[i])
+            );
+            let BYe = this.addPoint(
+                B[i],
+                this.mulPointEscalar(YList[i], e_BigInt)
+            );
+            if(!this.deepEqual(upkz_1, AXe) ||
+                !this.deepEqual(gz_1hz_2, BYe)){
+                assert.fail();
                 return false;
             }
         }
@@ -220,11 +308,11 @@ class CryptoTool{
     sigmaProofOfKeyGenerator(upk, r, sks, rhoList, hash, randomList){
         // check length
         if (rhoList.length !== randomList.length - 2) {
-            throw new Error("rhoListNew, (randomList-2) should have the same length");
+            throw new Error("rhoListOld, (randomList-2) should have the same length");
         }
         // check length > 0
         if (rhoList.length === 0) {
-            throw new Error("rhoListNew should have length > 0");
+            throw new Error("rhoListOld should have length > 0");
         }
 
         let A = this.mulPointEscalar(this.PBASE[0], randomList[0]);
@@ -286,6 +374,7 @@ class CryptoTool{
             )
         )
         if(!this.deepEqual(g_yupk_y2, AY1_eA2)){
+            assert.fail();
             return false;
         }
 
@@ -302,6 +391,7 @@ class CryptoTool{
                 )
             );
             if(!this.deepEqual(g_yh_z, AX_eB)){
+                assert.fail();
                 return false;
             }
         }

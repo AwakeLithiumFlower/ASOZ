@@ -145,7 +145,8 @@ describe("test", function () {
         let v_2_new = 9;
         let pkList_r = [BigInt(Math.random() * 2 ** 128), BigInt(Math.random() * 2 ** 128)];
         let rhoList = [BigInt(Math.random() * 2 ** 128), BigInt(Math.random() * 2 ** 128)];
-        let cmList_new = cryptoTool.cmListCalculator(rhoList,pkList_r,[v_1_new,v_2_new]);
+        let cmList_new = cryptoTool.array2BigIntList(
+            cryptoTool.cmListCalculator(rhoList,pkList_r,[v_1_new,v_2_new]));
         let input = {
             rhoList: rhoList,
             pkList: pkList_r,
@@ -266,21 +267,39 @@ describe("test", function () {
         // ]
         let upk = cryptoTool.pointGenerator(t);
 
-        // zk-SNARK part
         console.log("1-1");
-        await generateTransaction(1, 1, upk);
-        console.log("2-2");
-        await generateTransaction(2, 2, upk);
-        console.log("3-3");
-        await generateTransaction(3, 3, upk);
-        console.log("4-4");
-        await generateTransaction(4, 4, upk);
-        console.log("5-5");
-        await generateTransaction(5, 5, upk);
-        console.log("6-6");
-        await generateTransaction(6, 6, upk);
-        // let transaction_info = await generateTransaction(2, 2, upk);
+        let transaction_info1_1 = await generateTransaction(1, 1, upk);
+        await simgaVerify(1, 1, transaction_info1_1, upk);
+        console.log("1-2");
+        let transaction_info1_2 = await generateTransaction(1, 2, upk);
+        await simgaVerify(1, 2, transaction_info1_2, upk);
+        console.log("1-3");
+        let transaction_info1_3 = await generateTransaction(1, 3, upk);
+        await simgaVerify(1, 3, transaction_info1_3, upk);
+        console.log("1-4");
+        let transaction_info1_4 = await generateTransaction(1, 4, upk);
+        await simgaVerify(1, 4, transaction_info1_4, upk);
+        console.log("1-5");
+        let transaction_info1_5 = await generateTransaction(1, 5, upk);
+        await simgaVerify(1, 5, transaction_info1_5, upk);
+        console.log("1-6");
+        let transaction_info1_6 = await generateTransaction(1, 6, upk);
+        await simgaVerify(1, 6, transaction_info1_6, upk);
+    });
 
+    it('part 8: js test transaction without audit', async () => {
+        console.log("1-1");
+        await generateTransactionWithoutAudit(1, 1);
+        console.log("1-2");
+        await generateTransactionWithoutAudit(1, 2);
+        console.log("1-3");
+        await generateTransactionWithoutAudit(1, 3);
+        console.log("1-4");
+        await generateTransactionWithoutAudit(1, 4);
+        console.log("1-5");
+        await generateTransactionWithoutAudit(1, 5);
+        console.log("1-6");
+        await generateTransactionWithoutAudit(1, 6);
     });
 
     it("how to convert between BigInt and Array[32]", async () => {
@@ -403,15 +422,16 @@ describe("test", function () {
 
     // generate a transaction and proof
     async function generateTransaction(in_num, out_num, upk) {
-        console.time("time point 1: generate proof");
+        console.time("time point: generate zk-SANRK proof part 1");
+
         // random generate rhoList of the old commitment
         let rhoList_old = generateRandomArray(in_num, 253);
-        // random generate old commitments' value from [0,16)
-        let vList_old = generateRandomArray(in_num, 4);
+        // random generate old commitments' value from [128,256)
+        let vList_old = generateRandomArray(in_num, 7).map(x => x + BigInt(128));
         let sum = vList_old.reduce((a, b) => a + b, BigInt(0));
         // generate value output that equal to the sum of old commitments' value
-        let vList_new = [...Array(vList_old.length - 1)
-            .fill(BigInt(1)), sum - BigInt(vList_old.length - 1)];
+        let vList_new = [...Array(out_num - 1)
+            .fill(BigInt(1)), sum - BigInt(out_num - 1)];
         // generate sender's pk
         let sk_s = generateRandomArray(1, 253)[0];
         let pk_s = cryptoTool.randomPointGenerator(sk_s);
@@ -426,16 +446,14 @@ describe("test", function () {
         let cmList_new = cryptoTool.cmListCalculator(rhoList_new, pkList_r, vList_new);
         // let hash = await buildPoseidon();
         // generate nullifier
-        let snList = cryptoTool.array2FField((cryptoTool.snListCalculator(rhoList_old, sk_s)));
+        let snList = cryptoTool.snListCalculator(rhoList_old, sk_s);
         // generate audit ciphertext
-        let r2 = generateRandomArray(out_num, 253);
-        let r3 = generateRandomArray(in_num, 253);
+        let r2 = Array.from({length: out_num},
+            (_, k) => cryptoTool.point2BigInt(
+                cryptoTool.PRF_k(pkList_r[k], rhoList_new[k])[0]));
+        let r3 = generateRandomArray(1, 253)[0];
         let r4 = generateRandomArray(out_num, 253);
-        let in_audit_dicts = [];
-        for(let i=0;i<in_num;i++){
-            in_audit_dicts.push(cryptoTool.auditCiphertextPks(upk,r3[i],pk_s))
-        }
-        let in_audit_enc = mergeDicts(in_audit_dicts);
+        let in_audit_enc = cryptoTool.auditCiphertextPks(upk,r3,pk_s);
         let out_audit_dicts = [];
         for(let i=0;i<out_num;i++){
             out_audit_dicts.push(Object.assign(
@@ -455,8 +473,8 @@ describe("test", function () {
         };
 
         let output = {
-            cmList_r: cmList_new,
-            snList_s: snList.map(val => val[0]),
+            cmList_r: cryptoTool.array2BigIntList(cmList_new),
+            snList_s: cryptoTool.array2BigIntList(snList),
             X2: cryptoTool.array2BigIntList(mergeDicts(out_audit_dicts)['X2']),
             Y2: cryptoTool.array2BigIntList(mergeDicts(out_audit_dicts)['Y2'])
         }
@@ -464,39 +482,41 @@ describe("test", function () {
 
         // suppose the old value is on two merkle tree on chain
         let merkle_dict = Array.from({length: in_num},
-            (_, i) => createSimulatedMerkleTreeAndWitness2(32, cmList_old[i]));
+            (_, i) =>
+                createSimulatedMerkleTreeAndWitness2(32, cryptoTool.array2BigIntList(cmList_old)[i]));
         let old_merkle_tree = mergeDicts(merkle_dict);
 
         input = Object.assign(input, old_merkle_tree);
 
-        console.timeEnd("time point 1: generate proof");
         // console.log('input', input);
         // console.log('output', output);
 
-        // // output json file
-        // let json = JSON.stringify(input, null, 2);
-        // fs.writeFile('zk/'+in_num.toString()+'-'+in_num.toString()+'input.json', json, (err) => {
-        //     if (err) throw err;
-        //     console.log('Data written to file zk/2-2input.json');
-        // });
+        // output json file
+        let json = JSON.stringify(input, null, 2);
+        fs.writeFile('zk/experiment/'+in_num.toString()+'-'+out_num.toString()+'input.json', json, (err) => {
+            if (err) throw err;
+            // console.log('Data written to file zk/experiment/2-2input.json');
+        });
         // json = JSON.stringify(output, null, 2);
-        // fs.writeFile('zk/'+in_num.toString()+'-'+in_num.toString()+'output.json', json, (err) => {
+        // fs.writeFile('zk/experiment/'+in_num.toString()+'-'+out_num.toString()+'output.json', json, (err) => {
         //     if (err) throw err;
-        //     console.log('Data written to file zk/2-2output.json');
+        //     // console.log('Data written to file zk/experiment/2-2output.json');
         // });
 
         changeCircomFile("component main = testScheme("+in_num.toString()+","+out_num.toString()+",32);");
 
-        console.time("time point 2: generate witness");
+        // console.time("time point 2: generate witness");
         circuit = await wasm_tester(path.resolve("zk/circuits/main_test.circom"));
         let w = await circuit.calculateWitness(input, true);
-        console.timeEnd("time point 2: generate witness");
+        // console.timeEnd("time point 2: generate witness");
 
-        console.log('witness size',sizeof(w));
-        console.time("time point 3: valid proof on zk-SNARK");
-        // await circuit.checkConstraints(w);
-        await circuit.assertOut(w, output);
-        console.timeEnd("time point 3: valid proof on zk-SNARK");
+        // console.log('witness size',sizeof(w));
+        // console.time("time point 3: verify proof on zk-SNARK");
+        // // await circuit.checkConstraints(w);
+        // await circuit.assertOut(w, output);
+        // console.timeEnd("time point 3: verify proof on zk-SNARK");
+
+        console.timeEnd("time point: generate zk-SANRK proof part 1");
 
         return {
             sk_s: sk_s,
@@ -504,18 +524,154 @@ describe("test", function () {
             pkList_r: pkList_r,
             vInput: vList_old,
             vOutput: vList_new,
-            rho_old: rhoList_old,
-            rho_new: rhoList_new,
+            rhoList_old: rhoList_old,
+            rhoList_new: rhoList_new,
             cmList_new: cmList_new,
             cmList_old: cmList_old,
             snList: snList,
             in_audit_enc: in_audit_enc,
             out_audit_enc: out_audit_enc,
+            r2:r2,
+            r3:r3,
+            r4:r4
         }
     }
 
-    async function simgaVerify(in_num, out_num, upk){
+    // generate a transaction and proof without audit
+    async function generateTransactionWithoutAudit(in_num, out_num) {
+        console.log("transaction without audit");
+        console.time("time point: generate zk-SANRK proof part 1");
+        // random generate rhoList of the old commitment
+        let rhoList_old = generateRandomArray(in_num, 253);
+        // random generate old commitments' value from [128,256)
+        let vList_old = generateRandomArray(in_num, 7).map(x => x + BigInt(128));
+        let sum = vList_old.reduce((a, b) => a + b, BigInt(0));
+        // generate value output that equal to the sum of old commitments' value
+        let vList_new = [...Array(out_num - 1)
+            .fill(BigInt(1)), sum - BigInt(out_num - 1)];
+        // generate sender's pk
+        let sk_s = generateRandomArray(1, 253)[0];
+        let pk_s = cryptoTool.randomPointGenerator(sk_s);
+        // generate receivers' pk
+        let skList_r = generateRandomArray(out_num, 253);
+        let pkList_r = Array.from({length: out_num},
+            (_, k) => cryptoTool.randomPointGenerator(skList_r[k]));
+        // generate old commitments
+        let cmList_old = cryptoTool.cmListCalculator(rhoList_old, Array(in_num).fill(pk_s), vList_old);
+        // generate new commitments
+        let rhoList_new = generateRandomArray(out_num, 253);
+        let cmList_new = cryptoTool.cmListCalculator(rhoList_new, pkList_r, vList_new);
+        // let hash = await buildPoseidon();
+        // generate nullifier
+        let snList = cryptoTool.snListCalculator(rhoList_old, sk_s);
 
+        let input = {
+            sk_s: sk_s,
+            pkList_r: cryptoTool.array2FField(pkList_r),
+            vInput: vList_old,
+            vOutput: vList_new,
+            rho_old: rhoList_old,
+            rho_new: rhoList_new
+        };
+
+        let output = {
+            cmList_r: cryptoTool.array2BigIntList(cmList_new),
+            snList_s: cryptoTool.array2BigIntList(snList)
+        }
+
+
+        // suppose the old value is on two merkle tree on chain
+        let merkle_dict = Array.from({length: in_num},
+            (_, i) =>
+                createSimulatedMerkleTreeAndWitness2(32, cryptoTool.array2BigIntList(cmList_old)[i]));
+        let old_merkle_tree = mergeDicts(merkle_dict);
+
+        input = Object.assign(input, old_merkle_tree);
+
+        // console.log('input', input);
+        // console.log('output', output);
+
+        // output json file
+        let json = JSON.stringify(input, null, 2);
+        fs.writeFile('zk/experiment/'+in_num.toString()+'-'+out_num.toString()+'input_without_audit.json', json, (err) => {
+            if (err) throw err;
+            // console.log('Data written to file zk/experiment/2-2input.json');
+        });
+        // json = JSON.stringify(output, null, 2);
+        // fs.writeFile('zk/experiment/'+in_num.toString()+'-'+out_num.toString()+'output_without_audit.json', json, (err) => {
+        //     if (err) throw err;
+        //     // console.log('Data written to file zk/experiment/2-2output.json');
+        // });
+
+        changeCircomFile("component main = testSchemeWithoutAudit("+in_num.toString()+","+out_num.toString()+",32);");
+
+        // console.time("time point 2: generate witness");
+        circuit = await wasm_tester(path.resolve("zk/circuits/main_test.circom"));
+        let w = await circuit.calculateWitness(input, true);
+        // console.timeEnd("time point 2: generate witness");
+
+        // console.log('witness size',sizeof(w));
+        // console.time("time point 3: verify proof on zk-SNARK");
+        // await circuit.checkConstraints(w);
+        // await circuit.assertOut(w, output);
+        // console.timeEnd("time point 3: verify proof on zk-SNARK");
+
+        console.timeEnd("time point: generate zk-SANRK proof part 1");
+
+        return {
+            sk_s: sk_s,
+            pk_s: pk_s,
+            pkList_r: pkList_r,
+            vInput: vList_old,
+            vOutput: vList_new,
+            rhoList_old: rhoList_old,
+            rhoList_new: rhoList_new,
+            cmList_new: cmList_new,
+            cmList_old: cmList_old,
+            snList: snList
+        }
+    }
+
+    async function simgaVerify(in_num, out_num, verify_dict, upk){
+        console.time("time point: generate sigma proof");
+        let randomList = Array.from({length: out_num},
+            (_, i) => generateRandomArray(2,253));
+        let result_key = cryptoTool.sigmaProofOfValueGenerator(upk, verify_dict.r2,
+            verify_dict.vOutput,keccak256,randomList);
+        let randomList2 = generateRandomArray(in_num+2,253);
+        let result_key2 = cryptoTool.sigmaProofOfKeyGenerator(upk, verify_dict.r3,
+            verify_dict.sk_s,verify_dict.rhoList_old,keccak256,randomList2);
+        let randomList_3 = Array.from({length: in_num},
+            (_, i) => generateRandomArray(2,253));
+        let result_key3 = cryptoTool.sigmaProofOfSkGenerator(upk, [verify_dict.r3],
+            [verify_dict.sk_s], keccak256, randomList_3);
+        console.timeEnd("time point: generate sigma proof");
+
+        let sigma_params_size = sizeof(result_key.A) + sizeof(result_key.B) +
+            sizeof(result_key.zList_1) + sizeof(result_key.zList_2) +
+            sizeof(verify_dict.in_audit_enc.X) + sizeof(verify_dict.cmList_new) +
+            sizeof(result_key2.A) + sizeof(result_key2.A_2) +
+            sizeof(result_key2.B) + sizeof(result_key2.zList) +
+            sizeof(result_key2.y) + sizeof(result_key2.y_2) +
+            sizeof(verify_dict.snList) + sizeof(verify_dict.in_audit_enc.Y1) +
+            sizeof(result_key3.A) + sizeof(result_key3.B) +
+            sizeof(result_key3.zList_1) + sizeof(result_key3.zList_2) +
+            sizeof(verify_dict.in_audit_enc.X1) + sizeof(verify_dict.sk_s);
+        console.log('sigma proof size', sigma_params_size);
+
+        console.time("time point: verify sigma proof");
+        cryptoTool.sigmaProofOfValueVerifier(result_key.A, result_key.B,
+            result_key.zList_1, result_key.zList_2, upk, verify_dict.out_audit_enc.X,
+            verify_dict.cmList_new, keccak256);
+
+        cryptoTool.sigmaProofOfKeyVerifier(result_key2.A, result_key2.A_2,
+            result_key2.B,result_key2.zList, result_key2.y, result_key2.y_2,
+            upk, verify_dict.snList, verify_dict.in_audit_enc.Y1, keccak256);
+
+        cryptoTool.sigmaProofOfSkVerifier(result_key3.A, result_key3.B,
+            result_key3.zList_1, result_key3.zList_2, upk, [verify_dict.in_audit_enc.X1],
+            [verify_dict.in_audit_enc.Y1], keccak256);
+        console.timeEnd("time point: verify sigma proof");
     }
 
     function changeCircomFile(s){

@@ -43,6 +43,75 @@ template testAdd() {
 }
 
 
+template testSchemeWithoutAudit(inputNum,outputNum,nLevels){
+    signal input sk_s;
+    signal input pkList_r[outputNum][2];
+    signal input key[inputNum];
+    signal input root[inputNum];
+    signal input siblings[inputNum][nLevels];
+    signal input vInput[inputNum];
+    signal input vOutput[outputNum];
+    signal input rho_old[inputNum];
+    signal input rho_new[outputNum];
+
+    signal output cmList_r[outputNum];
+    signal output snList_s[inputNum];
+
+    component cmList_old = cmListGen(inputNum);
+    component cmList_new = cmListGen(outputNum);
+    component snList[inputNum];
+    component treeVerify[inputNum];
+
+    signal pkx_s;
+    signal pky_s;
+    component mulPk = BabyPbkGH(0);
+    mulPk.in <== sk_s;
+    pkx_s <== mulPk.Ax;
+    pky_s <== mulPk.Ay;
+
+    for(var i=0;i<inputNum;i++){
+        cmList_old.rhoList[i] <== rho_old[i];
+        cmList_old.vList[i] <== vInput[i];
+        cmList_old.pkList[i] <== pkx_s;
+        treeVerify[i] = Mkt2Verifier(nLevels);
+        treeVerify[i].key <== key[i];
+        treeVerify[i].root <== root[i];
+        for(var j=0;j<nLevels;j++){
+            treeVerify[i].siblings[j] <== siblings[i][j];
+        }
+
+        snList[i] = PRFsn();
+        snList[i].rho <== rho_old[i];
+        snList[i].pkx <== pkx_s;
+        snList[i].pky <== pky_s;
+        snList_s[i] <== snList[i].out;
+    }
+    for(var i=0;i<inputNum;i++){
+        treeVerify[i].value <== cmList_old.outList[i];
+    }
+
+    for(var i=0;i<outputNum;i++){
+        cmList_new.rhoList[i] <== rho_new[i];
+        cmList_new.vList[i] <== vOutput[i];
+        cmList_new.pkList[i] <== pkList_r[i][0];
+    }
+    for(var i=0;i<outputNum;i++){
+        cmList_r[i] <== cmList_new.outList[i];
+    }
+
+//    var vInputSum = 0;
+//    var vOutputSum = 0;
+//    signal zeroSum;
+//    zeroSum <-- 0;
+//    for(var i=0;i<inputNum;i++){
+//        vInputSum = vInputSum + vInput[i];
+//    }
+//    for(var i=0;i<outputNum;i++){
+//        vOutputSum = vOutputSum + vOutput[i];
+//    }
+//    zeroSum === vInputSum - vOutputSum;
+}
+
 template testScheme(inputNum,outputNum,nLevels){
     signal input sk_s;
     signal input pkList_r[outputNum][2];
