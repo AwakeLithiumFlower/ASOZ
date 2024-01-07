@@ -1,18 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: 参数
-:: 运行目录
+:: parameters
 set filepath=%~1
-:: 任务名称
 set jobName=%~2
 set randText=%~3
 set contributor=%~4
-:: 椭圆曲线类型
 set curve=%~5
-:: 好像和电路容量有关
 set tau=%~6
-:: 证明中秘密的参数的json文件
 set secretFile=%~7
 
 cd %filepath%
@@ -28,7 +23,7 @@ node %jobName%_js\generate_witness.js %jobName%_js\%jobName%.wasm %secretFile% %
 :: start a new "powers of tau" ceremony
 call snarkjs powersoftau new %curve% %tau% pot%tau%_0000.ptau -v
 :: contribute to the ceremony
-:: 生成随机数文件
+:: Generate random number file
 echo %randText%
 echo %randText%>randtext.txt
 call snarkjs powersoftau contribute pot%tau%_0000.ptau pot%tau%_0001.ptau --name="First contribution" -v < randtext.txt
@@ -48,5 +43,5 @@ call snarkjs groth16 prove %jobName%_0001.zkey %jobName%witness.wtns %jobName%pr
 
 :: Verifying a Proof
 :: call snarkjs groth16 verify verification_key.json public.json proof.json
-:: 生成智能合约函数verifyProof的输入参数，实际对应proof文件
+:: Generate input parameters for the smart contract function verifyProof, which actually correspond to the proof file
 :: call snarkjs generatecall

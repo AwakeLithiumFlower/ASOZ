@@ -1,27 +1,27 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: 设置程序名称和要搜索的字符串
+:: Set program name and string to search for
 set command=%~1
 
-:: 记录开始时间
+:: recording start time
 for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set start_time=%%a
 
-:: 执行程序并将输出重定向到变量中
+:: Execute the program and redirect the output to a variable
 :: call %command% > temp.txt
-:: 执行程序
+:: Execute program
 call %command%
 
-:: 记录结束时间并计算执行时间
+:: Record the end time and calculate the execution time
 for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set end_time=%%a
 set /a elapsed_time=(1!end_time:~8,6!-1!start_time:~8,6!+1000000) %% 1000000 * 1000 + (1!end_time:~15,3!-1!start_time:~15,3!)
 
-:: 打印执行结果
+:: Print execution results
 :: type "temp.txt"
-:: 删除临时文件
+:: Delete Temporary Files
 :: del temp.txt
 
-:: 输出执行时间
+:: Output execution time
 echo Execution time: !elapsed_time! milliseconds.
 
 endlocal
