@@ -126,8 +126,8 @@ describe("test", function () {
     });
 
     it("js PRF_k", async () => {
-        let pk = BigInt(Math.random() * 2 ** 253);
-        let rho = BigInt(Math.random() * 2 ** 253);
+        let pk = BigInt(Math.random() * 2 ** 128);
+        let rho = BigInt(Math.random() * 2 ** 128);
         console.log("pk", pk);
         console.log("rho", rho);
 
@@ -189,12 +189,12 @@ describe("test", function () {
         let v_1_new = 3;
         let v_2_new = 9;
         // generate receivers' pk
-        let pkList_r = generateRandomArray(2, 253);
+        let pkList_r = generateRandomArray(2, 128);
         // generate audit key
-        let t = generateRandomArray(1,253)[0];
+        let t = generateRandomArray(1,128)[0];
         let upk = cryptoTool.randomPointGenerator(t);
         // generate new coin's rho
-        let rhoList_new = generateRandomArray(2, 253);
+        let rhoList_new = generateRandomArray(2, 128);
         // generate new commitments, also called Y
         let cmList_new = [cryptoTool.cmCalculator(pkList_r[0], rhoList_new[0], v_1_new),
             cryptoTool.cmCalculator(pkList_r[1], rhoList_new[1], v_2_new)];
@@ -202,8 +202,8 @@ describe("test", function () {
         let rList = [Fr.toObject(cryptoTool.PRF_k(pkList_r[0], rhoList_new[0])[0]),
             Fr.toObject(cryptoTool.PRF_k(pkList_r[1], rhoList_new[1])[0])];
         let hash_e = keccak256;
-        let randomList = [generateRandomArray(2,253),
-            generateRandomArray(2,253)];
+        let randomList = [generateRandomArray(2,128),
+            generateRandomArray(2,128)];
 
         let result = cryptoTool.sigmaProofOfValueGenerator(upk, rList, [v_1_new,v_2_new], hash_e, randomList);
         let A = result.A;
@@ -225,20 +225,20 @@ describe("test", function () {
     // js verifier of sigma protocol
     it("part6: js verifier of sigma protocol2", async () => {
         // random r on upk exponential position
-        let r = generateRandomArray(1, 253)[0];
+        let r = generateRandomArray(1, 128)[0];
         // generate sender's pk,sk
-        let sks = generateRandomArray(1, 253)[0];
+        let sks = generateRandomArray(1, 128)[0];
         let pks = cryptoTool.randomPointGenerator(sks);
         // generate audit key
-        let t = generateRandomArray(1,253)[0];
+        let t = generateRandomArray(1,128)[0];
         let upk = cryptoTool.randomPointGenerator(t);
         // generate old coin's rho
-        let rhoList_old = generateRandomArray(2, 253);
+        let rhoList_old = generateRandomArray(2, 128);
         // generate old coin's nullifier
         let snList_old = cryptoTool.snListCalculator(rhoList_old, sks);
 
         let hash_e = keccak256;
-        let randomList = generateRandomArray(4,253);
+        let randomList = generateRandomArray(4,128);
 
         let result = cryptoTool.sigmaProofOfKeyGenerator(upk, r, sks, rhoList_old, hash_e, randomList);
         let A = result.A;
@@ -289,38 +289,44 @@ describe("test", function () {
 
     it('part 8: js test transaction without audit', async () => {
         console.log("1-1");
-        await generateTransactionWithoutAudit(1, 1);
+        let tx_result = await generateTransactionWithoutAudit(1, 1);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
         console.log("1-2");
-        await generateTransactionWithoutAudit(1, 2);
+        tx_result = await generateTransactionWithoutAudit(1, 2);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
         console.log("1-3");
-        await generateTransactionWithoutAudit(1, 3);
+        tx_result = await generateTransactionWithoutAudit(1, 3);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
         console.log("1-4");
-        await generateTransactionWithoutAudit(1, 4);
+        tx_result = await generateTransactionWithoutAudit(1, 4);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
         console.log("1-5");
-        await generateTransactionWithoutAudit(1, 5);
+        tx_result = await generateTransactionWithoutAudit(1, 5);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
         console.log("1-6");
-        await generateTransactionWithoutAudit(1, 6);
+        tx_result = await generateTransactionWithoutAudit(1, 6);
+        console.log("origin cost", sizeof(tx_result.cmList_new + tx_result.snList));
     });
 
-    it("how to convert between BigInt and Array[32]", async () => {
-        // this is a point in Array[2][32]
-        let p1 = PBASE[0];
-        console.log(p1);
-        // convert to BigInt
-        let t1 = [Fr.toObject(p1[0]),Fr.toObject(p1[1])];
-        console.log(t1);
-        // convert back
-        let p2 = [Fr.e(t1[0].toString()),Fr.e(t1[1].toString())];
-        console.log(p2);
+    // it("how to convert between BigInt and Array[32]", async () => {
+    //     // this is a point in Array[2][32]
+    //     let p1 = PBASE[0];
+    //     console.log(p1);
+    //     // convert to BigInt
+    //     let t1 = [Fr.toObject(p1[0]),Fr.toObject(p1[1])];
+    //     console.log(t1);
+    //     // convert back
+    //     let p2 = [Fr.e(t1[0].toString()),Fr.e(t1[1].toString())];
+    //     console.log(p2);
+    //
+    //     console.log(":-)");
+    // });
 
-        console.log(":-)");
-    });
-
-    it("test2", async () => {
-        let vList_old = [1,2,3,4,5];
-        let sum = vList_old.reduce((a, b) => a + b, 0);
-        console.log([...Array(vList_old.length - 1).fill(1), sum - vList_old.length + 1]);
-    });
+    // it("test2", async () => {
+    //     let vList_old = [1,2,3,4,5];
+    //     let sum = vList_old.reduce((a, b) => a + b, 0);
+    //     console.log([...Array(vList_old.length - 1).fill(1), sum - vList_old.length + 1]);
+    // });
 
     function list2ObjectArray(l){
         let output = [];
@@ -425,7 +431,7 @@ describe("test", function () {
         console.time("time point: generate zk-SANRK proof part 1");
 
         // random generate rhoList of the old commitment
-        let rhoList_old = generateRandomArray(in_num, 253);
+        let rhoList_old = generateRandomArray(in_num, 128);
         // random generate old commitments' value from [128,256)
         let vList_old = generateRandomArray(in_num, 7).map(x => x + BigInt(128));
         let sum = vList_old.reduce((a, b) => a + b, BigInt(0));
@@ -433,16 +439,16 @@ describe("test", function () {
         let vList_new = [...Array(out_num - 1)
             .fill(BigInt(1)), sum - BigInt(out_num - 1)];
         // generate sender's pk
-        let sk_s = generateRandomArray(1, 253)[0];
+        let sk_s = generateRandomArray(1, 128)[0];
         let pk_s = cryptoTool.randomPointGenerator(sk_s);
         // generate receivers' pk
-        let skList_r = generateRandomArray(out_num, 253);
+        let skList_r = generateRandomArray(out_num, 128);
         let pkList_r = Array.from({length: out_num},
             (_, k) => cryptoTool.randomPointGenerator(skList_r[k]));
         // generate old commitments
         let cmList_old = cryptoTool.cmListCalculator(rhoList_old, Array(in_num).fill(pk_s), vList_old);
         // generate new commitments
-        let rhoList_new = generateRandomArray(out_num, 253);
+        let rhoList_new = generateRandomArray(out_num, 128);
         let cmList_new = cryptoTool.cmListCalculator(rhoList_new, pkList_r, vList_new);
         // let hash = await buildPoseidon();
         // generate nullifier
@@ -451,8 +457,8 @@ describe("test", function () {
         let r2 = Array.from({length: out_num},
             (_, k) => cryptoTool.point2BigInt(
                 cryptoTool.PRF_k(pkList_r[k], rhoList_new[k])[0]));
-        let r3 = generateRandomArray(1, 253)[0];
-        let r4 = generateRandomArray(out_num, 253);
+        let r3 = generateRandomArray(1, 128)[0];
+        let r4 = generateRandomArray(out_num, 128);
         let in_audit_enc = cryptoTool.auditCiphertextPks(upk,r3,pk_s);
         let out_audit_dicts = [];
         for(let i=0;i<out_num;i++){
@@ -542,7 +548,7 @@ describe("test", function () {
         console.log("transaction without audit");
         console.time("time point: generate zk-SANRK proof part 1");
         // random generate rhoList of the old commitment
-        let rhoList_old = generateRandomArray(in_num, 253);
+        let rhoList_old = generateRandomArray(in_num, 128);
         // random generate old commitments' value from [128,256)
         let vList_old = generateRandomArray(in_num, 7).map(x => x + BigInt(128));
         let sum = vList_old.reduce((a, b) => a + b, BigInt(0));
@@ -550,16 +556,16 @@ describe("test", function () {
         let vList_new = [...Array(out_num - 1)
             .fill(BigInt(1)), sum - BigInt(out_num - 1)];
         // generate sender's pk
-        let sk_s = generateRandomArray(1, 253)[0];
+        let sk_s = generateRandomArray(1, 128)[0];
         let pk_s = cryptoTool.randomPointGenerator(sk_s);
         // generate receivers' pk
-        let skList_r = generateRandomArray(out_num, 253);
+        let skList_r = generateRandomArray(out_num, 128);
         let pkList_r = Array.from({length: out_num},
             (_, k) => cryptoTool.randomPointGenerator(skList_r[k]));
         // generate old commitments
         let cmList_old = cryptoTool.cmListCalculator(rhoList_old, Array(in_num).fill(pk_s), vList_old);
         // generate new commitments
-        let rhoList_new = generateRandomArray(out_num, 253);
+        let rhoList_new = generateRandomArray(out_num, 128);
         let cmList_new = cryptoTool.cmListCalculator(rhoList_new, pkList_r, vList_new);
         // let hash = await buildPoseidon();
         // generate nullifier
@@ -635,42 +641,87 @@ describe("test", function () {
     async function simgaVerify(in_num, out_num, verify_dict, upk){
         console.time("time point: generate sigma proof");
         let randomList = Array.from({length: out_num},
-            (_, i) => generateRandomArray(2,253));
+            (_, i) => generateRandomArray(2,128));
         let result_key = cryptoTool.sigmaProofOfValueGenerator(upk, verify_dict.r2,
             verify_dict.vOutput,keccak256,randomList);
-        let randomList2 = generateRandomArray(in_num+2,253);
+        let randomList2 = generateRandomArray(in_num+2,128);
         let result_key2 = cryptoTool.sigmaProofOfKeyGenerator(upk, verify_dict.r3,
             verify_dict.sk_s,verify_dict.rhoList_old,keccak256,randomList2);
         let randomList_3 = Array.from({length: in_num},
-            (_, i) => generateRandomArray(2,253));
+            (_, i) => generateRandomArray(2,128));
         let result_key3 = cryptoTool.sigmaProofOfSkGenerator(upk, [verify_dict.r3],
             [verify_dict.sk_s], keccak256, randomList_3);
         console.timeEnd("time point: generate sigma proof");
 
-        let sigma_params_size = sizeof(result_key.A) + sizeof(result_key.B) +
-            sizeof(result_key.zList_1) + sizeof(result_key.zList_2) +
-            sizeof(verify_dict.in_audit_enc.X) + sizeof(verify_dict.cmList_new) +
-            sizeof(result_key2.A) + sizeof(result_key2.A_2) +
-            sizeof(result_key2.B) + sizeof(result_key2.zList) +
-            sizeof(result_key2.y) + sizeof(result_key2.y_2) +
-            sizeof(verify_dict.snList) + sizeof(verify_dict.in_audit_enc.Y1) +
-            sizeof(result_key3.A) + sizeof(result_key3.B) +
-            sizeof(result_key3.zList_1) + sizeof(result_key3.zList_2) +
-            sizeof(verify_dict.in_audit_enc.X1) + sizeof(verify_dict.sk_s);
-        console.log('sigma proof size', sigma_params_size);
+        // let sigma_params_size = sizeof(result_key.A) + sizeof(result_key.B) +
+        //     sizeof(result_key.zList_1) + sizeof(result_key.zList_2) +
+        //     sizeof(verify_dict.out_audit_enc.X) + sizeof(verify_dict.cmList_new) +
+        //     sizeof(result_key2.A) + sizeof(result_key2.A_2) +
+        //     sizeof(result_key2.B) + sizeof(result_key2.zList) +
+        //     sizeof(result_key2.y) + sizeof(result_key2.y_2) +
+        //     sizeof(verify_dict.snList) + sizeof(verify_dict.in_audit_enc.Y1) +
+        //     sizeof(result_key3.A) + sizeof(result_key3.B) +
+        //     sizeof(result_key3.zList_1) + sizeof(result_key3.zList_2) +
+        //     sizeof(verify_dict.in_audit_enc.X1);
+        // console.log("result_key.A", sizeof(cryptoTool.array2FField(result_key.A)));
+        // console.log("result_key.B", sizeof(cryptoTool.array2FField(result_key.B)));
+        // console.log("result_key.zList_1", sizeof(result_key.zList_1));
+        // console.log("result_key.zList_2", sizeof(result_key.zList_2));
+        // // console.log("verify_dict.out_audit_enc.X", sizeof(cryptoTool.array2FField(verify_dict.out_audit_enc.X)));
+        // console.log("verify_dict.cmList_new", sizeof(cryptoTool.array2FField(verify_dict.cmList_new)));
+        // console.log("result_key2.A", sizeof(cryptoTool.point2Field(result_key2.A)));
+        // console.log("result_key2.A_2", sizeof(cryptoTool.point2Field(result_key2.A_2)));
+        // console.log("result_key2.B", sizeof(cryptoTool.array2FField(result_key2.B)));
+        // console.log("result_key2.zList", sizeof(result_key2.zList));
+        // console.log("result_key2.y", sizeof(result_key2.y));
+        // console.log("result_key2.y_2", sizeof(result_key2.y_2));
+        // console.log("verify_dict.snList", sizeof(cryptoTool.array2FField(verify_dict.snList)));
+        // // console.log("verify_dict.in_audit_enc.Y1", sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.Y1)));
+        // console.log("result_key3.A", sizeof(cryptoTool.array2FField(result_key3.A)));
+        // console.log("result_key3.B", sizeof(cryptoTool.array2FField(result_key3.B)));
+        // console.log("result_key3.zList_1", sizeof(result_key3.zList_1));
+        // console.log("result_key3.zList_2", sizeof(result_key3.zList_2));
+        // // console.log("verify_dict.in_audit_enc.X1", sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.X1)));
+        // console.log('sigma proof size', sigma_params_size);
+        let sum =
+            sizeof(result_key.A) +
+            sizeof(result_key.B) +
+            sizeof(result_key.zList_1) +
+            sizeof(result_key.zList_2) +
+            sizeof(cryptoTool.array2FField(verify_dict.out_audit_enc.X)) +
+            sizeof(cryptoTool.array2FField(verify_dict.cmList_new)) +
+            sizeof(result_key2.A) +
+            // sizeof(cryptoTool.point2Field(result_key2.A_2)) +
+            sizeof(result_key2.B) +
+            sizeof(result_key2.zList) +
+            sizeof(result_key2.y) +
+            sizeof(result_key2.y_2) +
+            sizeof(cryptoTool.array2FField(verify_dict.snList)) +
+            sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.Y1)) +
+            sizeof(result_key3.A) +
+            sizeof(result_key3.B) +
+            sizeof(result_key3.zList_1) +
+            sizeof(result_key3.zList_2);
+            sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.X1));
+        console.log('sigma proof size', sum);
+
+        let sum_origin = sizeof(cryptoTool.array2FField(verify_dict.cmList_new)) +
+            sizeof(cryptoTool.array2FField(verify_dict.snList));
+        console.log('sigma proof size origin', sum_origin);
 
         console.time("time point: verify sigma proof");
         cryptoTool.sigmaProofOfValueVerifier(result_key.A, result_key.B,
             result_key.zList_1, result_key.zList_2, upk, verify_dict.out_audit_enc.X,
             verify_dict.cmList_new, keccak256);
 
+        cryptoTool.sigmaProofOfSkVerifier(result_key3.A, result_key3.B,
+            result_key3.zList_1, result_key3.zList_2, upk, [verify_dict.in_audit_enc.X1],
+            [verify_dict.in_audit_enc.Y1], keccak256);
+
         cryptoTool.sigmaProofOfKeyVerifier(result_key2.A, result_key2.A_2,
             result_key2.B,result_key2.zList, result_key2.y, result_key2.y_2,
             upk, verify_dict.snList, verify_dict.in_audit_enc.Y1, keccak256);
 
-        cryptoTool.sigmaProofOfSkVerifier(result_key3.A, result_key3.B,
-            result_key3.zList_1, result_key3.zList_2, upk, [verify_dict.in_audit_enc.X1],
-            [verify_dict.in_audit_enc.Y1], keccak256);
         console.timeEnd("time point: verify sigma proof");
     }
 

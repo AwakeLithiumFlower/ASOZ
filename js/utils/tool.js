@@ -147,16 +147,16 @@ class CryptoTool{
         let A = [];
         let B = [];
         for (let i = 0; i < randomList.length; i++) {
-            A.push(this.mulPointEscalar(upk, randomList[i][0]));
-            B.push(this.addPoint(
+            A.push(hash(this.mulPointEscalar(upk, randomList[i][0]).toString()));
+            B.push(hash(this.addPoint(
                 this.mulPointEscalar(this.PBASE[0], randomList[i][0]),
                 this.mulPointEscalar(this.PBASE[1], randomList[i][1])
-                )
+                ).toString())
             );
         }
 
-        let hashInput = (this.sumPointArray(A)
-            + this.sumPointArray(B)).toString();
+        let hashInput = A.reduce((a, b) => a + b, "") +
+            B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
         let zList_1 = [];
@@ -192,26 +192,21 @@ class CryptoTool{
         if (A.length === 0) {
             throw new Error("A, B, zList_1, zList_2 should have length > 0");
         }
-        let hashInput = (this.sumPointArray(A)
-            + this.sumPointArray(B)).toString();
+        let hashInput = A.reduce((a, b) => a + b, "") +
+            B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
         for(let i=0;i<A.length;i++){
-            let upkz_1 = this.mulPointEscalar(upk, zList_1[i]);
-            let AXe = this.addPoint(
-                A[i],
-                this.mulPointEscalar(XList[i], e_BigInt)
-            );
-            let gz_1hz_2 = this.addPoint(
+            let a = this.curve.order-e_BigInt%this.curve.order;
+            let upkz_1Xe = this.addPoint(this.mulPointEscalar(upk, zList_1[i]),
+                this.mulPointEscalar(XList[i], this.curve.order - e_BigInt%this.curve.order));
+            let gz_1hz_2 = this.addPoint(this.addPoint(
                 this.mulPointEscalar(this.PBASE[0], zList_1[i]),
                 this.mulPointEscalar(this.PBASE[1], zList_2[i])
-            );
-            let BYe = this.addPoint(
-                B[i],
-                this.mulPointEscalar(YList[i], e_BigInt)
-            );
-            if(!this.deepEqual(upkz_1, AXe) ||
-                !this.deepEqual(gz_1hz_2, BYe)){
+            ),
+                this.mulPointEscalar(YList[i], this.curve.order - e_BigInt%this.curve.order));
+            if(hash(upkz_1Xe.toString()) !== A[i] ||
+                hash(gz_1hz_2.toString()) !== B[i]){
                 assert.fail();
                 return false;
             }
@@ -232,16 +227,16 @@ class CryptoTool{
         let A = [];
         let B = [];
         for (let i = 0; i < randomList.length; i++) {
-            A.push(this.mulPointEscalar(this.PBASE[0], randomList[i][0]));
-            B.push(this.addPoint(
+            A.push(hash(this.mulPointEscalar(this.PBASE[0], randomList[i][0]).toString()));
+            B.push(hash(this.addPoint(
                     this.mulPointEscalar(upk, randomList[i][0]),
                     this.mulPointEscalar(this.PBASE[0], randomList[i][1])
-                )
+                ).toString())
             );
         }
 
-        let hashInput = (this.sumPointArray(A)
-            + this.sumPointArray(B)).toString();
+        let hashInput = A.reduce((a, b) => a + b, "") +
+            B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
         let zList_1 = [];
@@ -277,26 +272,23 @@ class CryptoTool{
         if (A.length === 0) {
             throw new Error("A, B, zList_1, zList_2 should have length > 0");
         }
-        let hashInput = (this.sumPointArray(A)
-            + this.sumPointArray(B)).toString();
+        let hashInput = A.reduce((a, b) => a + b, "") +
+            B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
         for(let i=0;i<A.length;i++){
-            let upkz_1 = this.mulPointEscalar(this.PBASE[0], zList_1[i]);
-            let AXe = this.addPoint(
-                A[i],
-                this.mulPointEscalar(XList[i], e_BigInt)
-            );
+            let upkz_1 = this.addPoint(this.mulPointEscalar(this.PBASE[0], zList_1[i]),
+                this.mulPointEscalar(XList[i], this.curve.order - e_BigInt%this.curve.order));
+
             let gz_1hz_2 = this.addPoint(
-                this.mulPointEscalar(upk, zList_1[i]),
-                this.mulPointEscalar(this.PBASE[0], zList_2[i])
+                this.addPoint(
+                    this.mulPointEscalar(upk, zList_1[i]),
+                    this.mulPointEscalar(this.PBASE[0], zList_2[i])),
+                this.mulPointEscalar(YList[i], this.curve.order - e_BigInt%this.curve.order)
             );
-            let BYe = this.addPoint(
-                B[i],
-                this.mulPointEscalar(YList[i], e_BigInt)
-            );
-            if(!this.deepEqual(upkz_1, AXe) ||
-                !this.deepEqual(gz_1hz_2, BYe)){
+
+            if(hash(upkz_1.toString()) !== A[i] ||
+                hash(gz_1hz_2.toString()) !== B[i]){
                 assert.fail();
                 return false;
             }
@@ -319,12 +311,14 @@ class CryptoTool{
         let A_2 = this.mulPointEscalar(upk, randomList[1]);
         let B = [];
         for (let i = 2; i < randomList.length; i++) {
-            B.push(this.mulPointEscalar(this.PBASE[1], randomList[i]));
+            B.push(
+                hash(this.addPoint(this.mulPointEscalar(this.PBASE[1], randomList[i]),
+                    A).toString())
+            );
         }
+        A = hash(this.addPoint(A, A_2).toString());
 
-        let hashInput = (this.point2BigInt(A[0])
-            + this.point2BigInt(A_2[0])
-            + this.sumPointArray(B)).toString();
+        let hashInput = A.toString() + B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
 
@@ -355,42 +349,30 @@ class CryptoTool{
         if (B.length === 0) {
             throw new Error("B, zList should have length > 0");
         }
-        
-        let hashInput = (this.point2BigInt(A[0])
-            + this.point2BigInt(A_2[0])
-            + this.sumPointArray(B)).toString();
+
+        let hashInput = A.toString() + B.reduce((a, b) => a + b, "");
         let e = hash(hashInput);
         let e_BigInt = BigInt("0x"+e);
         
-        let g_yupk_y2 = this.addPoint(
+        let g_yupk_y2 = this.addPoint(this.addPoint(
             this.mulPointEscalar(this.PBASE[0], y),
             this.mulPointEscalar(upk, y_2)
-        )
-        let AY1_eA2 = this.addPoint(
-            A,
-            this.addPoint(
-                A_2,
-                this.mulPointEscalar(Y, e_BigInt)
-            )
-        )
-        if(!this.deepEqual(g_yupk_y2, AY1_eA2)){
+        ),this.mulPointEscalar(Y, this.curve.order - e_BigInt%this.curve.order));
+
+
+        if(hash(g_yupk_y2.toString()) !== A){
             assert.fail();
             return false;
         }
 
         for(let i=0;i<B.length;i++){
-            let g_yh_z = this.addPoint(
+            let g_yh_z = this.addPoint(this.addPoint(
                 this.mulPointEscalar(this.PBASE[0], y),
                 this.mulPointEscalar(this.PBASE[1], zList[i])
-            );
-            let AX_eB = this.addPoint(
-                A,
-                this.addPoint(
-                    B[i],
-                    this.mulPointEscalar(XList[i], e_BigInt)
-                )
-            );
-            if(!this.deepEqual(g_yh_z, AX_eB)){
+            ),this.mulPointEscalar(XList[i], this.curve.order - e_BigInt%this.curve.order));
+
+
+            if(hash(g_yh_z.toString()) !== B[i]){
                 assert.fail();
                 return false;
             }
@@ -498,6 +480,11 @@ class CryptoTool{
     addPoint(point1, point2){
         return this.curve.addPoint(point1,point2);
     }
+
+    subPoint(point1, point2){
+        return this.addPoint(point1,
+            [point2[0],this.field.e(-this.point2BigInt(point2[1]))]);
+    }
     
     mulPointEscalar(point, escalar){
         return this.curve.mulPointEscalar(point,escalar);
@@ -511,8 +498,8 @@ class CryptoTool{
     // point to bigint[2]
     point2Field(point){
         return [
-            this.field.toObject(point[0]),
-            this.field.toObject(point[1])
+            this.point2BigInt(point[0]),
+            this.point2BigInt(point[1])
         ];
     }
 }

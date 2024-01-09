@@ -12,6 +12,7 @@
   "author": "Tianjian Liu",
   "license": "MIT",
   "dependencies": {
+    "bulletproof-js": "^1.0.7",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
     "circom_tester": "^0.0.19",
