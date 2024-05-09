@@ -1,0 +1,163 @@
+{
+	"compiler": {
+		"version": "0.8.22+commit.4fc1097e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "point1",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "point2",
+						"type": "uint256[2]"
+					}
+				],
+				"name": "pointAdd",
+				"outputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "result",
+						"type": "uint256[2]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "point",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "scalar",
+						"type": "uint256"
+					}
+				],
+				"name": "pointMul",
+				"outputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "result",
+						"type": "uint256[2]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[][2]",
+						"name": "A",
+						"type": "uint256[][2]"
+					},
+					{
+						"internalType": "uint256[][2]",
+						"name": "B",
+						"type": "uint256[][2]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "zList_1",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "zList_2",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "upk",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256[][2]",
+						"name": "XList",
+						"type": "uint256[][2]"
+					},
+					{
+						"internalType": "uint256[][2]",
+						"name": "YList",
+						"type": "uint256[][2]"
+					}
+				],
+				"name": "sigmaProofOfValueVerifier",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "result",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "test",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/VerifySigmaProtocol1-1.sol": "VerifySigmaProtocol"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/CurveBabyJubJub.sol": {
+			"keccak256": "0xc9e0528d6a7630661f616d388756f513e8a100a577d48bce298128bd0337e909",
+			"urls": [
+				"bzz-raw://e7409e585747acd32620153b7ad959ead12db60c61c56c377f102db8e684e9bb",
+				"dweb:/ipfs/QmYmX5CosoUs1Z4GVjK1B6C7fVckgJX5reP5xWoBQWMPjh"
+			]
+		},
+		"contracts/VerifySigmaProtocol1-1.sol": {
+			"keccak256": "0xea5901b4e04658765c473f3986836fd8f3b815732b447d67794847d9f8684584",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://31fe43e11a86006f334b325bb16338c926b1b9ed3553d84e714903507454e3b5",
+				"dweb:/ipfs/QmW4JdSH3KurBZmfJ1EtbvXYLGqes9u9LNDt5eb4NJb5mP"
+			]
+		}
+	},
+	"version": 1
+}

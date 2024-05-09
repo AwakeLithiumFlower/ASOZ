@@ -14,6 +14,8 @@ const {CryptoTool} = require("./utils/tool.js");
 const keccak256 = require("js-sha3").keccak256;
 const {fromBigIntLike} = require("hardhat/internal/util/bigint");
 const sizeof = require('object-sizeof');
+const {SigmaProtocol} = require("./utils/sigma_protocol.js");
+
 
 randomArray = (length) =>
     [...new Array(length)].map(() => BigInt(Math.random() * 2 ** 256));
@@ -27,6 +29,7 @@ describe("test", function () {
     let PBASE;
     let BASE8;
     let cryptoTool;
+    let sigmaProtocol;
 
     before(async () => {
         hash = await buildPoseidon();
@@ -46,14 +49,35 @@ describe("test", function () {
                 [Fr.e("5299619240641551281634865583518297030282874472190772894086521144482721001553"),Fr.e("16950150798460657717958625567821834550301663161624707787222815936182638968203")]
             ];
         cryptoTool = new CryptoTool(babyJub,PBASE);
+        sigmaProtocol = new SigmaProtocol();
     });
 
     it("test", async () => {
-        if(field === Fr){
-            console.log("field === Fr");
-        }else{
-            console.log("field !== Fr");
-        }
+        // if(field === Fr){
+        //     console.log("field === Fr");
+        // }else{
+        //     console.log("field !== Fr");
+        // }
+        // let sigmaProtocol = new SigmaProtocol();
+        // await sigmaProtocol.test();
+        // await console.log(sigmaProtocol.bn128Tool.bigintToHexStr(21888242871839275222246405745257275088548364400416034343698204186575808495617n));
+        // await console.log(sigmaProtocol.bn128Tool.mul([1,2],"0000000000000029b85045b68181585d2833e84879b9709143e1f593f0000002"));
+        // await console.log(sigmaProtocol.bn128Tool.mul(
+        //     [4082367875863433681332203403145435568316851327593401208105741076214120093531n,
+        //         8495653923123431417604973247489272438418190587263600148770280649306958101930n],
+        //     sigmaProtocol.bn128Tool.order+1n));
+        // await console.log(sigmaProtocol.bn128Tool.mul([1,2],sigmaProtocol.bn128Tool.order+1n));
+        // await console.log(sigmaProtocol.bn128Tool.hexStrToBigInt(sigmaProtocol.bn128Tool.mul([1,2],sigmaProtocol.bn128Tool.order+1n)[0])%sigmaProtocol.bn128Tool.p);
+        // console.log(cryptoTool.point2Field(PBASE[0]))
+        // console.log(cryptoTool.point2Field(cryptoTool.mulPointEscalar(PBASE[0],cryptoTool.curve.order+1n)))
+        const dictionary = {
+            a: 10, // int
+            b: "hello", // string
+            c: [1n, 2, [3, "world"]], // mixed array with recursion
+            d: "another string" // string
+        };
+
+        console.log(calculateSize(dictionary));
     });
 
     it("part1: js Merkle Tree proof", async () => {
@@ -222,6 +246,40 @@ describe("test", function () {
         console.log(cryptoTool.sigmaProofOfValueVerifier(A, B, zList_1, zList_2, upk, XList, cmList_new, hash_e));
     });
 
+    // js verifier of sigma protocol 2
+    it("part5: js verifier of sigma protocol 2", async () => {
+        // one new commitments' value
+        let v_1_new = 3;
+        // generate receivers' pk
+        let pkList_r = generateRandomArray(1, 128);
+        // generate audit key
+        let t = generateRandomArray(1,128)[0];
+        let upk = cryptoTool.randomPointGenerator(t);
+        // generate new coin's rho
+        let rhoList_new = generateRandomArray(1, 128);
+        // generate new commitments, also called Y
+        let cmList_new = [cryptoTool.cmCalculator(pkList_r[0], rhoList_new[0], v_1_new)];
+
+        let rList = [Fr.toObject(cryptoTool.PRF_k(pkList_r[0], rhoList_new[0])[0])];
+        let hash_e = keccak256;
+        let randomList = [generateRandomArray(2,128)];
+
+        let result = cryptoTool.sigmaProofOfValueGenerator(upk, rList, [v_1_new], hash_e, randomList);
+        let A = result.A;
+        let B = result.B;
+        let zList_1 = result.zList_1;
+        let zList_2 = result.zList_2;
+        let XList = [
+            babyJub.mulPointEscalar(upk, rList[0])
+        ]
+        let sol_input = result.sol_input;
+        sol_input['upk'] = cryptoTool.point2FField16(upk);
+        sol_input['XList'] = cryptoTool.array2FField16(XList);
+        sol_input['YList'] = cryptoTool.array2FField16(cmList_new);
+        console.log(sol_input);
+        console.log(cryptoTool.sigmaProofOfValueVerifier(A, B, zList_1, zList_2, upk, XList, cmList_new, hash_e));
+    });
+
     // js verifier of sigma protocol
     it("part6: js verifier of sigma protocol2", async () => {
         // random r on upk exponential position
@@ -258,33 +316,71 @@ describe("test", function () {
 
     // js verifier of sigma protocol
     it("part7: js n input n output ZKP proof and valid", async () => {
-        // generate upk, assume all upk are the same(key agreement scheme is better, but we do not consider in here)
-        // so we assume usk = 15841103015534172323098042064091785275182938422861005572878585484163854252324n
-        let t = BigInt(15841103015534172323098042064091785275182938422861005572878585484163854252324);
-        // so upk = [
-        //   6331850395537585927290680390752447884532794188697923556312761505688747217175n,
-        //   2462143816122748060390620296277376383273414174303403200944239221836425025776n
-        // ]
-        let upk = cryptoTool.pointGenerator(t);
+        // // generate upk, assume all upk are the same(key agreement scheme is better, but we do not consider in here)
+        // // so we assume usk = 15841103015534172323098042064091785275182938422861005572878585484163854252324n
+        // let t = BigInt(15841103015534172323098042064091785275182938422861005572878585484163854252324);
+        // // so upk = [
+        // //   6331850395537585927290680390752447884532794188697923556312761505688747217175n,
+        // //   2462143816122748060390620296277376383273414174303403200944239221836425025776n
+        // // ]
+        // let upk = cryptoTool.pointGenerator(t);
+        //
+        // console.log("1-1");
+        // let transaction_info1_1 = await generateTransaction(1, 1, upk);
+        // await sigmaVerify(1, 1, transaction_info1_1, upk);
+        // console.log("1-2");
+        // let transaction_info1_2 = await generateTransaction(1, 2, upk);
+        // await sigmaVerify(1, 2, transaction_info1_2, upk);
+        // console.log("1-3");
+        // let transaction_info1_3 = await generateTransaction(1, 3, upk);
+        // await sigmaVerify(1, 3, transaction_info1_3, upk);
+        // console.log("1-4");
+        // let transaction_info1_4 = await generateTransaction(1, 4, upk);
+        // await sigmaVerify(1, 4, transaction_info1_4, upk);
+        // console.log("1-5");
+        // let transaction_info1_5 = await generateTransaction(1, 5, upk);
+        // await sigmaVerify(1, 5, transaction_info1_5, upk);
+        // console.log("1-6");
+        // let transaction_info1_6 = await generateTransaction(1, 6, upk);
+        // await sigmaVerify(1, 6, transaction_info1_6, upk);
 
         console.log("1-1");
-        let transaction_info1_1 = await generateTransaction(1, 1, upk);
-        await simgaVerify(1, 1, transaction_info1_1, upk);
+        let transaction_info1_1 = await sigmaProtocol.generateSigmaProof(1,1);
+        let proof_info1_1 = sigmaProtocol.sigmaProofGenerator(1, 1, transaction_info1_1, sigmaProtocol.upk, keccak256);
+        console.log(proof_info1_1)
+        console.log("size:", calculateSize(proof_info1_1),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_1, transaction_info1_1, keccak256));
+
         console.log("1-2");
-        let transaction_info1_2 = await generateTransaction(1, 2, upk);
-        await simgaVerify(1, 2, transaction_info1_2, upk);
+        let transaction_info1_2 = await sigmaProtocol.generateSigmaProof(1,2);
+        let proof_info1_2 = sigmaProtocol.sigmaProofGenerator(1, 2, transaction_info1_2, sigmaProtocol.upk, keccak256);
+        console.log("size:", calculateSize(proof_info1_2),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_2, transaction_info1_2, keccak256));
+
         console.log("1-3");
-        let transaction_info1_3 = await generateTransaction(1, 3, upk);
-        await simgaVerify(1, 3, transaction_info1_3, upk);
+        let transaction_info1_3 = await sigmaProtocol.generateSigmaProof(1,3);
+        let proof_info1_3 = sigmaProtocol.sigmaProofGenerator(1, 3, transaction_info1_3, sigmaProtocol.upk, keccak256);
+        console.log("size:", calculateSize(proof_info1_3),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_3, transaction_info1_3, keccak256));
+
         console.log("1-4");
-        let transaction_info1_4 = await generateTransaction(1, 4, upk);
-        await simgaVerify(1, 4, transaction_info1_4, upk);
+        let transaction_info1_4 = await sigmaProtocol.generateSigmaProof(1,4);
+        let proof_info1_4 = sigmaProtocol.sigmaProofGenerator(1, 4, transaction_info1_4, sigmaProtocol.upk, keccak256);
+        console.log("size:", calculateSize(proof_info1_4),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_4, transaction_info1_4, keccak256));
+
         console.log("1-5");
-        let transaction_info1_5 = await generateTransaction(1, 5, upk);
-        await simgaVerify(1, 5, transaction_info1_5, upk);
+        let transaction_info1_5 = await sigmaProtocol.generateSigmaProof(1,5);
+        let proof_info1_5 = sigmaProtocol.sigmaProofGenerator(1, 5, transaction_info1_5, sigmaProtocol.upk, keccak256);
+        console.log("size:", calculateSize(proof_info1_5),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_5, transaction_info1_5, keccak256));
+
         console.log("1-6");
-        let transaction_info1_6 = await generateTransaction(1, 6, upk);
-        await simgaVerify(1, 6, transaction_info1_6, upk);
+        let transaction_info1_6 = await sigmaProtocol.generateSigmaProof(1,6);
+        let proof_info1_6 = sigmaProtocol.sigmaProofGenerator(1, 6, transaction_info1_6, sigmaProtocol.upk, keccak256);
+        console.log("size:", calculateSize(proof_info1_6),"bytes");
+        console.log(sigmaProtocol.sigmaProofVerifier(sigmaProtocol.upk, proof_info1_6, transaction_info1_6, keccak256));
+
     });
 
     it('part 8: js test transaction without audit', async () => {
@@ -638,7 +734,7 @@ describe("test", function () {
         }
     }
 
-    async function simgaVerify(in_num, out_num, verify_dict, upk){
+    async function sigmaVerify(in_num, out_num, verify_dict, upk){
         console.time("time point: generate sigma proof");
         let randomList = Array.from({length: out_num},
             (_, i) => generateRandomArray(2,128));
@@ -653,36 +749,7 @@ describe("test", function () {
             [verify_dict.sk_s], keccak256, randomList_3);
         console.timeEnd("time point: generate sigma proof");
 
-        // let sigma_params_size = sizeof(result_key.A) + sizeof(result_key.B) +
-        //     sizeof(result_key.zList_1) + sizeof(result_key.zList_2) +
-        //     sizeof(verify_dict.out_audit_enc.X) + sizeof(verify_dict.cmList_new) +
-        //     sizeof(result_key2.A) + sizeof(result_key2.A_2) +
-        //     sizeof(result_key2.B) + sizeof(result_key2.zList) +
-        //     sizeof(result_key2.y) + sizeof(result_key2.y_2) +
-        //     sizeof(verify_dict.snList) + sizeof(verify_dict.in_audit_enc.Y1) +
-        //     sizeof(result_key3.A) + sizeof(result_key3.B) +
-        //     sizeof(result_key3.zList_1) + sizeof(result_key3.zList_2) +
-        //     sizeof(verify_dict.in_audit_enc.X1);
-        // console.log("result_key.A", sizeof(cryptoTool.array2FField(result_key.A)));
-        // console.log("result_key.B", sizeof(cryptoTool.array2FField(result_key.B)));
-        // console.log("result_key.zList_1", sizeof(result_key.zList_1));
-        // console.log("result_key.zList_2", sizeof(result_key.zList_2));
-        // // console.log("verify_dict.out_audit_enc.X", sizeof(cryptoTool.array2FField(verify_dict.out_audit_enc.X)));
-        // console.log("verify_dict.cmList_new", sizeof(cryptoTool.array2FField(verify_dict.cmList_new)));
-        // console.log("result_key2.A", sizeof(cryptoTool.point2Field(result_key2.A)));
-        // console.log("result_key2.A_2", sizeof(cryptoTool.point2Field(result_key2.A_2)));
-        // console.log("result_key2.B", sizeof(cryptoTool.array2FField(result_key2.B)));
-        // console.log("result_key2.zList", sizeof(result_key2.zList));
-        // console.log("result_key2.y", sizeof(result_key2.y));
-        // console.log("result_key2.y_2", sizeof(result_key2.y_2));
-        // console.log("verify_dict.snList", sizeof(cryptoTool.array2FField(verify_dict.snList)));
-        // // console.log("verify_dict.in_audit_enc.Y1", sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.Y1)));
-        // console.log("result_key3.A", sizeof(cryptoTool.array2FField(result_key3.A)));
-        // console.log("result_key3.B", sizeof(cryptoTool.array2FField(result_key3.B)));
-        // console.log("result_key3.zList_1", sizeof(result_key3.zList_1));
-        // console.log("result_key3.zList_2", sizeof(result_key3.zList_2));
-        // // console.log("verify_dict.in_audit_enc.X1", sizeof(cryptoTool.point2Field(verify_dict.in_audit_enc.X1)));
-        // console.log('sigma proof size', sigma_params_size);
+        // assume we give linear aggregation of the proof
         let sum =
             sizeof(result_key.A) +
             sizeof(result_key.B) +
@@ -736,5 +803,29 @@ describe("test", function () {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    function calculateSize(obj) {
+        // Initialize a counter to keep track of the total number of leaf values
+        let totalValues = 0;
+
+        // Recursive function to traverse through values; if it's an array, it will recurse, else it will count the value
+        function countValues(val) {
+            if (Array.isArray(val)) {
+                // If the current value is an array, iterate over the items and call countValues recursively
+                val.forEach(item => countValues(item));
+            } else {
+                // If the current value is not an array, increment the total values counter
+                totalValues++;
+            }
+        }
+
+        // Traverse the object and start the recursive value counting for each property
+        Object.values(obj).forEach(value => countValues(value));
+
+        // Calculate the total size in bytes assuming each value is 256 bits (32 bytes)
+        let totalSizeInBytes = totalValues * 32;
+
+        return totalSizeInBytes;
     }
 });

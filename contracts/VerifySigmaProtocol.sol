@@ -47,7 +47,7 @@ contract VerifySigmaProtocol {
         bytes32 hash = keccak256(abi.encodePacked(hashInputStr));
         uint256 e = uint256(hash);
 
-        for(uint256 i = 0; i < A.length; i++) {
+        for(uint8 i = 0; i < A.length; i++) {
             validResponse1(zList_1[i],
             XList[i], A[i], upk, e);
             validResponse2(zList_1[i], zList_2[i],
@@ -58,7 +58,7 @@ contract VerifySigmaProtocol {
     }
 
     function sumArray(uint256[][2] memory array) internal pure returns (uint256 sum) {
-        for (uint256 i = 0; i < array.length; i++) {
+        for (uint8 i = 0; i < array.length; i++) {
             sum += array[i][0];
         }
     }
@@ -94,9 +94,9 @@ contract VerifySigmaProtocol {
         if (array1.length != array2.length) {
             revert("valid failed, array length not equal");
         } else {
-            for (uint256 i = 0; i < array1.length; i++) {
+            for (uint8 i = 0; i < array1.length; i++) {
                 if (array1[i] != array2[i]) {
-                    revert("valid failed!");
+                    revert(uint2str(array1[i]));
                 }
             }
         }

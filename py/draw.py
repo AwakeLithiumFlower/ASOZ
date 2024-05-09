@@ -12,24 +12,20 @@ plt.tight_layout()  # 添加这一行来自动调整布局
 # sigma_proof_size_data = [4.573, 7.364, 10.210, 13.065, 15.859, 18.739]
 
 
-proof_part2_data = [2265, 2321, 2345, 2492, 2953, 3272]
-proof_part2_orign_data = [1892, 2359, 2422, 2432, 2322, 2703]
-verify_part_data = [984, 987, 1094, 1171, 1078, 1224]
-verify_part_orign_data = [1017, 1172, 1000, 1024, 1032, 1203]
+proof_part2_data = [1.274, 1.322, 1.375, 1.446, 1.685, 1.768]
+proof_part2_orign_data = [1.093, 1.264, 1.299, 1.355, 1.392, 1.430]
+verify_part_data = [0.546, 0.536, 0.546, 0.550, 0.538, 0.536]
+verify_part_orign_data = [0.542, 0.545, 0.550, 0.545, 0.553, 0.534]
 generate_proof_part1_data = [7.677, 9.955, 11.632, 14.141, 15.740, 17.847]
-generate_sigma_proof_data = [0.103448, 0.117812, 0.14564, 0.179615, 0.212844, 0.237328]
-sigma_proof_size_data = [1616, 2233, 2852, 3469, 4075, 4696]
+generate_sigma_proof_data = [0.024975, 0.025043, 0.023788, 0.023526, 0.023745, 0.023988]
+sigma_proof_size_data = [1056, 1184, 1312, 1440, 1568, 1696]
 cmsnList_size_data = [324, 487, 646, 805, 970, 1133]
 zkSNARK_proof_size_data = [803, 806, 803, 801, 806, 807]
-verify_sigma_proof_data = [0.376732, 0.499119, 0.609232, 0.753592, 0.879517, 1.016]
+verify_sigma_proof_data = [0.11919, 0.118864, 0.113186, 0.112502, 0.111437, 0.110342]
 generate_proof_part1_without_audit_data = [7.193, 8.694, 9.383, 10.740, 12.176, 13.525]
 zkSNARK_witness_size_data = [546, 693, 841, 989, 1137, 1284]  # kb
 zkSNARK_witness_size_orign_data = [496, 595, 693, 792, 890, 989]  # kb
 
-proof_part2_data = [i / 1000 for i in proof_part2_data]
-proof_part2_orign_data = [i / 1000 for i in proof_part2_orign_data]
-verify_part_data = [i / 1000 for i in verify_part_data]
-verify_part_orign_data = [i / 1000 for i in verify_part_orign_data]
 sigma_proof_size_data = [i / 1024 for i in sigma_proof_size_data]
 zkSNARK_proof_size_data = [i / 1024 for i in zkSNARK_proof_size_data]
 cmsnList_size_data = [i / 1024 for i in cmsnList_size_data]
@@ -39,7 +35,7 @@ generate_proof_time = [i + j + k for i, j, k in zip(generate_proof_part1_data, p
 verify_proof_time_orign = verify_part_orign_data
 verify_proof_time = [i + j for i, j in zip(verify_part_data, verify_sigma_proof_data)]
 transmission_overhead_orign = [i + j for i, j in zip(zkSNARK_proof_size_data, cmsnList_size_data)]
-transmission_overhead = sigma_proof_size_data
+transmission_overhead = [i + j for i, j in zip(zkSNARK_proof_size_data,sigma_proof_size_data)]
 storage_cost_orign = [i + j for i, j in zip(zkSNARK_witness_size_orign_data, zkSNARK_proof_size_data)]
 storage_cost = [i + j for i, j in zip(zkSNARK_witness_size_data, sigma_proof_size_data)]
 
@@ -63,6 +59,7 @@ ax.set_ylabel('Time (s)')
 ax.set_xticks(ind)
 ax.set_xticklabels(('1-1', '1-2', '1-3', '1-4', '1-5', '1-6'))
 ax.legend()
+ax.set_ylim([0, 0.9])
 
 fig.savefig('verify_time_comparison.png')
 

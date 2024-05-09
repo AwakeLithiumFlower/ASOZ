@@ -262,7 +262,7 @@ class CryptoTool{
         }
     }
 
-    // js valid of sigma proof of value
+    // js valid of sigma proof of sk
     sigmaProofOfSkVerifier(A, B, zList_1, zList_2, upk, XList, YList, hash){
         // check length
         if (A.length !== B.length || B.length !== zList_1.length || zList_1.length !== zList_2.length) {

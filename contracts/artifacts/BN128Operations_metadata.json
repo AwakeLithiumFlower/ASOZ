@@ -1,0 +1,103 @@
+{
+	"compiler": {
+		"version": "0.8.22+commit.4fc1097e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "point1",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "point2",
+						"type": "uint256[2]"
+					}
+				],
+				"name": "pointAdditionWithGasCost",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "result",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "gasCost",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[2]",
+						"name": "point",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "scalar",
+						"type": "uint256"
+					}
+				],
+				"name": "scalarMultiplicationWithGasCost",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "result",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "gasCost",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/testECMulAdd.sol": "BN128Operations"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/testECMulAdd.sol": {
+			"keccak256": "0xfc7307c2dd21ee1d5b85d60c937a7e756772ba1b8283c3df411b4249132dba87",
+			"urls": [
+				"bzz-raw://c705d6be0ec0d70bb91dad426584414f40c2847f4751334c0d199ea286b0b76b",
+				"dweb:/ipfs/QmV8sadW1NEH1J7um1wa5A1sMFJyqAenEY2pZKshzV1Szm"
+			]
+		}
+	},
+	"version": 1
+}

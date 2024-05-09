@@ -30,6 +30,8 @@
     "mocha": "^10.2.0",
     "node-fetch": "3",
     "object-sizeof": "^2.6.3",
+    "rustbn.js": "^0.3.0",
+    "seedrandom": "^3.0.5",
     "snarkjs": "^0.7.1"
   }
 }
