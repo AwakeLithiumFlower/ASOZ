@@ -129,9 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-zk/experiment
+zk/experiment/**
 
 .zip
 
 !record.log
-!zk/experiment/*.circom
+!zk/experiment/**/*.circom
