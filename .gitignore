@@ -133,5 +133,5 @@ zk/experiment
 
 .zip
 
-!/record.log
-!*.circom
+!record.log
+!zk/experiment/**/*.circom

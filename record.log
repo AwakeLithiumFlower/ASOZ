@@ -1,0 +1,124 @@
+proof part2
+1-1
+Execution time: 1267 milliseconds.
+1-2
+Execution time: 1332 milliseconds.
+1-3
+Execution time: 1397 milliseconds.
+1-4
+Execution time: 1410 milliseconds.
+1-5
+Execution time: 1725 milliseconds.
+1-6
+Execution time: 1786 milliseconds.
+1-1_orign
+Execution time: 1123 milliseconds.
+1-2_orign
+Execution time: 1304 milliseconds.
+1-3_orign
+Execution time: 1336 milliseconds.
+1-4_orign
+Execution time: 1348 milliseconds.
+1-5_orign
+Execution time: 1384 milliseconds.
+1-6_orign
+Execution time: 1454 milliseconds.
+verify part
+1-1
+[INFO]  snarkJS: OK!
+Execution time: 587 milliseconds.
+1-2
+[INFO]  snarkJS: OK!
+Execution time: 548 milliseconds.
+1-3
+[INFO]  snarkJS: OK!
+Execution time: 564 milliseconds.
+1-4
+[INFO]  snarkJS: OK!
+Execution time: 553 milliseconds.
+1-5
+[INFO]  snarkJS: OK!
+Execution time: 548 milliseconds.
+1-6
+[INFO]  snarkJS: OK!
+Execution time: 551 milliseconds.
+1-1_orign
+[INFO]  snarkJS: OK!
+Execution time: 551 milliseconds.
+1-2_orign
+[INFO]  snarkJS: OK!
+Execution time: 579 milliseconds.
+1-3_orign
+[INFO]  snarkJS: OK!
+Execution time: 551 milliseconds.
+1-4_orign
+[INFO]  snarkJS: OK!
+Execution time: 563 milliseconds.
+1-5_orign
+[INFO]  snarkJS: OK!
+Execution time: 587 milliseconds.
+1-6_orign
+[INFO]  snarkJS: OK!
+Execution time: 564 milliseconds.
+
+1-1
+transaction without audit
+time point: generate zk-SANRK proof part 1: 3.642s
+origin cost 468
+1-2
+transaction without audit
+time point: generate zk-SANRK proof part 1: 4.517s
+origin cost 692
+1-3
+transaction without audit
+time point: generate zk-SANRK proof part 1: 5.276s
+origin cost 912
+1-4
+transaction without audit
+time point: generate zk-SANRK proof part 1: 5.949s
+origin cost 1144
+1-5
+transaction without audit
+time point: generate zk-SANRK proof part 1: 7.005s
+origin cost 1368
+1-6
+transaction without audit
+time point: generate zk-SANRK proof part 1: 7.473s
+origin cost 1600
+
+1-1
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be1c91f5bbb274c296594f38b9afda1a97c4a752d90e9a0fb87d41cc65e5072c25200ce8b4f56869be899eddba5733abe8674c3aa021bbf9fd4b15423fc195bbb81415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 25.653ms
+size: 1056 bytes
+time point: verify sigma proof: 118.007ms
+true
+1-2
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be206c65335c760796f02e29935c4780f9537212699d9d30c5a0de15644c32b5011f8dcdd517c3ee089668bc50a1823d5e7a0e7ffcaa9ba289e0d48a870ee54bd81415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 25.936ms
+size: 1184 bytes
+time point: verify sigma proof: 120.586ms
+true
+1-3
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be2bcf863643f446b0d09ae7aa30641f998c9deb722d3a49982918fa1ab35ace690dfbb29095d5bf7fba3923f1a8e20fee49d8a7eab8c85ae288188fbbabb61e761415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 25.507ms
+size: 1312 bytes
+time point: verify sigma proof: 110.721ms
+true
+1-4
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be07de15161000dd0630bb0d6770a0c3e7aee5dceb053922e623e859781d4fcc4b2ea7ed84e811653655255ef3b077bdf7b0f1d7b2d3d5491f612f748bfcea1dba1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 23.695ms
+size: 1440 bytes
+time point: verify sigma proof: 111.904ms
+true
+1-5
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be04d9b3c704b0f81fcf274744a9836b0ed6f8fd0d5266b708682dff8e12814a6a2d18ca254d37f6233c65faa044519c4b01d0d50fa7fec11a59b81bee786e653d1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 23.72ms
+size: 1568 bytes
+time point: verify sigma proof: 113.498ms
+true
+1-6
+e hash 07540a0172fce1b7b04c5f841d9aadd2a05219403205efdc1d896ae2072ac62416317acea5734f30ac74dc8bc0a3e88a61d547b6e450db280010773928efbff51415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402371bbc6ebd9554550efa099fdc4108b7f4744febdaff2bfae5274b5742b70bb1415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04402e7c6f45a38b24e89d8e12948fa32a5d76e4d61b52c2109a839645823a5e70be117c0ec90542934c5db63caac4f285372b39a3b645d1429dfd94fcbcf140966a14c9b414a90b6ed0f092972ac0d2a2598d31bf3abd85bb8a92a649cd2e795bc01415e216f4134b0cd22f42b4071c998d6385047be239c3c9e2b1bf63afca04401205025075a21991e99359a5571bfea884895d1155b86f2ab9021fd5f0c639a4303c2f858ce646aeee20cee0b6708a6f49403594b40067d8d59d48d992b275a9
+time point: generate sigma proof: 24.277ms
+size: 1696 bytes
+time point: verify sigma proof: 110.787ms
+true
