@@ -132,3 +132,6 @@ dist
 zk/experiment
 
 .zip
+
+!record.log
+!.circom
